@@ -41,9 +41,11 @@ birthday_results_df =
 ```
 
 ```{r}
-birthday_results_df |>
+birthday_prob_df = birthday_results_df |>
   group_by(number_of_people) |>
-  summarize(prob_of_repeat = mean(repeated)) |>
+  summarize(prob_of_repeat = mean(repeated))
+
+birthday_prob_df |>
   ggplot(aes(x = number_of_people, y = prob_of_repeat)) +
   geom_point() +
   geom_line() +
