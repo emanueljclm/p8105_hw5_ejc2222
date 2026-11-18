@@ -1,0 +1,55 @@
+---
+title: "p8105_hw5_ejc2222"
+output: github_document
+date: "2026-11-18"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(p8105.datasets)
+library(tidyverse)
+
+```
+
+# Problem 1
+
+## The Birthday Problem
+
+```{r}
+birthdays = sample(1:365, size = 5, replace = TRUE)
+
+repeated_birthdays = length(unique(birthdays)) < 2
+```
+
+```{r}
+birthday_repeated(147)
+
+birthday_results_df =
+  tibble(
+    number_of_people = rep(5, 10000)
+  ) |>
+  mutate(
+    repeated = map_lgl(number_of_people, birthday_repeated)
+  )
+```
+
+```{r}
+birthday_results_df =
+  expand_grid(
+    number_of_people = 2:50,
+    iter = 1:1000
+  ) |>
+  mutate(
+    repeated - map_lgl(number_of_people, birthday_repeated)
+  )
+```
+
+```{r}
+birthday_results_df |>
+  group_by(number_of_people) |>
+  summarize(prob_of_repeat = mean(repeated)) |>
+  ggplot(aes(x = number_of_people, y = prob_of_repeat)) +
+  geom_point() +
+  geom_line()
+```
