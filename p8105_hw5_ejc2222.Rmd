@@ -9,7 +9,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(p8105.datasets)
 library(tidyverse)
-
 ```
 
 # Problem 1
@@ -17,31 +16,27 @@ library(tidyverse)
 ## The Birthday Problem
 
 ```{r}
-birthdays = sample(1:365, size = 5, replace = TRUE)
-
-repeated_birthdays = length(unique(birthdays)) < 2
+birthday_repeat = function(n_room) {
+  
+  birthdays = sample(1:365, size = n_room, replace = TRUE)
+  
+  repeated_birthdays = length(unique(birthdays)) < n_room
+  
+  return(repeated_birthdays)
+  
+}
 ```
 
 ```{r}
-birthday_repeated(147)
+set.seed(1236)
 
-birthday_results_df =
-  tibble(
-    number_of_people = rep(5, 10000)
-  ) |>
-  mutate(
-    repeated = map_lgl(number_of_people, birthday_repeated)
-  )
-```
-
-```{r}
 birthday_results_df =
   expand_grid(
     number_of_people = 2:50,
-    iter = 1:1000
+    iter = 1:10000
   ) |>
   mutate(
-    repeated - map_lgl(number_of_people, birthday_repeated)
+    repeated = map_lgl(number_of_people, birthday_repeat)
   )
 ```
 
@@ -51,5 +46,11 @@ birthday_results_df |>
   summarize(prob_of_repeat = mean(repeated)) |>
   ggplot(aes(x = number_of_people, y = prob_of_repeat)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  geom_hline(linetype = "dashed", yintercept = 0.5) +
+  labs(
+    title = "Probability of Sharing a Birthday",
+    x = "Group size (number of people)",
+    y = "Probability of at least one shared birthday"
+  )
 ```
