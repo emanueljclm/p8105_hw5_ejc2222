@@ -13,9 +13,7 @@ library(haven)
 library(stringr)
 ```
 
-# Problem 1
-
-## The Birthday Problem
+# Problem 1: The Birthday Problem
 
 ```{r}
 birthday_repeat = function(n_room) {
@@ -61,14 +59,14 @@ birthday_prob_df |>
 
 The probability of a shared birthday rises quickly with group size. It starts near zero for very small groups, climbs steeply between roughly 15 and 35 people, and then levels off as it approaches 1. The probability first exceeds 0.50 at a group size of `r birthday_prob_df |> filter(prob_of_repeat > 0.5) |> slice_min(number_of_people, n = 1) |> pull(number_of_people)`, so a shared birthday is more likely than not in a group of only about two dozen people. By 50 people, the probability reaches `r birthday_prob_df |> filter(number_of_people == 50) |> pull(prob_of_repeat) |> round(2)`, making a shared birthday highly likely. Each new person can share a birthday with anyone already in the group, so the number of possible pairs grows much faster than the group size.
 
-# Problem 2
+# Problem 2: Participants of a Longitudinal Study
 
-## Participants of a Longitudinal Study
+## Tidying the Data
 
 ```{r}
 longitudinal_df = tibble(file_name = list.files(path = "./data/longitudinal")) |>
   mutate(path = str_c("./data/longitudinal/", file_name),
-         data = map(path, \(x) read_csv(x, show_col_types = FALSE))
+         data = purrr::map(path, \(x) read_csv(x, show_col_types = FALSE))
   ) |>
   unnest(data) |>
   mutate(
@@ -89,4 +87,18 @@ longitudinal_df = tibble(file_name = list.files(path = "./data/longitudinal")) |
   mutate(
     week = as.numeric(week)) |>
   rename(participant = file_name)
+```
+
+## Creating the Spaghetti Plot
+
+```{r}
+longitudinal_df |>
+  ggplot(aes(x = week, y = observation, group = participant, color = arm)) +
+  geom_line(alpha = 0.5) +
+  geom_point() +
+  labs(
+    title = "Weekly Observations by Participant (Control vs. Experimental Arm)",
+    x = "Week",
+    y = "Observation value",
+    color = "Arm")
 ```
