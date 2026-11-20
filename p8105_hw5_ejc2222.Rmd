@@ -165,9 +165,41 @@ power_df |>
   labs(
     title = "Power of a One-Sample t-Test by True Mean (n = 30, σ = 5)",
     x = "True mean (μ)",
-    y = "Power (proportion of tests rejecting H₀)"
+    y = "Power (proportion of tests rejecting H0)"
   )
 ```
 
 When looking at the association between effect size and power ...
+
+## Plotting Average Estimates
+
+```{r}
+estimates_df = test_results_df |>
+  group_by(mu) |>
+  summarize(
+    mean_estimate = mean(estimate),
+    mean_rejected = mean(estimate[rejected])
+  ) |>
+  pivot_longer(
+    mean_estimate:mean_rejected,
+    names_to = "estimate_type",
+    values_to = "mean",
+    names_prefix = "mean_") |>
+  mutate(
+    estimate_type =
+      case_match(
+        estimate_type,
+        "estimate" ~ "All samples",
+        "rejected" ~ "Null rejected"))
+
+estimates_df |>
+  ggplot(aes(x = mu, y = mean, color = estimate_type)) +
+  geom_point() +
+  geom_line() +
+  labs(
+    title = "Average Estimate of μ̂ by True Mean (n = 30, σ = 5)",
+    x = "True mean (μ)",
+    y = "Average estimate of μ̂",
+    color = "Samples")
+```
 
