@@ -9,6 +9,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 library(p8105.datasets)
 library(tidyverse)
+library(haven)
+library(stringr)
 ```
 
 # Problem 1
@@ -58,3 +60,33 @@ birthday_prob_df |>
 ```
 
 The probability of a shared birthday rises quickly with group size. It starts near zero for very small groups, climbs steeply between roughly 15 and 35 people, and then levels off as it approaches 1. The probability first exceeds 0.50 at a group size of `r birthday_prob_df |> filter(prob_of_repeat > 0.5) |> slice_min(number_of_people, n = 1) |> pull(number_of_people)`, so a shared birthday is more likely than not in a group of only about two dozen people. By 50 people, the probability reaches `r birthday_prob_df |> filter(number_of_people == 50) |> pull(prob_of_repeat) |> round(2)`, making a shared birthday highly likely. Each new person can share a birthday with anyone already in the group, so the number of possible pairs grows much faster than the group size.
+
+# Problem 2
+
+## Participants of a Longitudinal Study
+
+```{r}
+longitudinal_df = tibble(file_name = list.files(path = "./data/longitudinal")) |>
+  mutate(path = str_c("./data/longitudinal/", file_name),
+         data = map(path, \(x) read_csv(x, show_col_types = FALSE))
+  ) |>
+  unnest(data) |>
+  mutate(
+    file_name = str_remove(file_name, "\\.csv$")) |>
+  separate(file_name, into = c("arm", "subject_id"), remove = FALSE, sep = "_") |>
+  mutate(
+    arm =
+      case_match(
+        arm,
+        "con" ~ "Control",
+        "exp" ~ "Experimental")) |>
+  select(-path) |>
+  pivot_longer(
+    week_1:week_8,
+    names_to = "week",
+    values_to = "observation",
+    names_prefix = "week_") |>
+  mutate(
+    week = as.numeric(week)) |>
+  rename(participant = file_name)
+```
